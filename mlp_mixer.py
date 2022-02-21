@@ -68,4 +68,24 @@ class MixerLayer(nn.Module):
 #TODO: in articolo c'è il discorso su 1x1 convolution
 
 class MLP_mixer(nn.Module):
-    
+    # Ci servono: 
+        # - n_patches fully connected che genera rappresentazione latente
+        #   le rappresentazioni latenti poi vanno in forma "maticiale"
+        # - N mixer layers (N è un iperparametro)
+        # - Global average pooling
+        # - FC finale
+
+    def __init__(self, patch_dim, n_channels, n_classes, hidden_dim_mlp_token, hidden_dim_mlp_channel, n_classes):
+        # :param patch_dims: dimensions of patch, will allow calculation of number of patches. Square image => square patches i.e. patch_dims = width = height
+        # :param n_channels: aka patch latent representation dimention
+        # :param hidden_dim_mlp_token: hidden dimension size for first mlp blocks (token mixing)
+        # :param hidden_dim_mlp_channel: hidden dimension size for second mlp blocks (channel mixing)
+        # :param n_classes: number of classes, defines size of last FC layer
+
+        ''' 
+        NOTE: si assumono immagini quadrate, se non sono quadrate, fare preprocessing aggiungendo padding
+        '''
+
+        super().__init__()
+        
+
