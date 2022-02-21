@@ -1,4 +1,5 @@
 import os
+from unittest.mock import patch
 import torch
 from torch import nn
 
@@ -75,7 +76,7 @@ class MLP_mixer(nn.Module):
         # - Global average pooling
         # - FC finale
 
-    def __init__(self, patch_dim, n_channels, n_classes, hidden_dim_mlp_token, hidden_dim_mlp_channel, n_classes):
+    def __init__(self, img_h_w, patch_dim,  n_classes, num_mixers_layers, hidden_dim_mlp_token, hidden_dim_mlp_channel):
         # :param patch_dims: dimensions of patch, will allow calculation of number of patches. Square image => square patches i.e. patch_dims = width = height
         # :param n_channels: aka patch latent representation dimention
         # :param hidden_dim_mlp_token: hidden dimension size for first mlp blocks (token mixing)
@@ -85,7 +86,13 @@ class MLP_mixer(nn.Module):
         ''' 
         NOTE: si assumono immagini quadrate, se non sono quadrate, fare preprocessing aggiungendo padding
         '''
-
         super().__init__()
+        # 1) self.patch_embedding, in comune con ViT 
+        # da (1) viene ricavato n_channels perchè è la dimensione del codice latente
+        num_patches = img_h_w // patch_dim # integer division
+        self.mixerlayers = nn.ModuleList([MixerLayer( ... )]) #TODO
         
+        for i in range(num_mixers_layers):
+
+
 
