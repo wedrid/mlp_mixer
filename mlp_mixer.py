@@ -5,6 +5,54 @@ from torch import nn
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+class PatchEmbedding(nn.Module):
+    # da chiara https://github.com/chiaraalbi46/VisionTransformer/blob/18783de487df1ac31f7c5cb153c10a79ef2a4586/embeddings.py#L10
+    """ Patch grid and flattening (reshaping the input tensor), then linear embedding.
+    Parameters
+    ----------
+    img_size : tuple
+            Size of one single image
+    in_chans : int
+            Channels of on image (for an RGB image is 3)
+    patch_size : int
+            Size of a single patch of an image
+    embed_dim : int
+            Embedding dimension
+    Attributes
+    ----------
+    n_patches : int
+            Number of patches of a single image
+    linear_embedding : nn.Linear
+            Linear embedding of the patches
+    """
+    def __init__(self, img_size=(36, 36), in_chans=3, patch_size=16, embed_dim=768):
+        super().__init__()
+        self.img_size = img_size  # tupla
+        self.patch_size = patch_size
+        self.in_chans = in_chans
+
+        # Controlli dimensioni divisibilità
+        assert (self.img_size[0] % patch_size == 0), "H needs to be divisible by patch size"
+        assert (self.img_size[1] % patch_size == 0), "W needs to be divisible by patch size"
+
+        self.n_patches = (self.img_size[0] * self.img_size[1]) // (self.patch_size * self.patch_size)  # H*W / P^2
+        # // divisione intera
+        self.linear_embedding = nn.Linear((self.patch_size * self.patch_size) * self.in_chans, embed_dim)
+        # bias=True di default
+    
+    def forward(self, x):
+        b, c, h, w = x.shape
+        x = x.permute(0, 2, 3, 1)  # (b, h, w, c)
+        x_reshaped = x.reshape(b, self.n_patches, self.patch_size * self.patch_size * self.in_chans)  # b, n, p^2 * c
+        out = self.linear_embedding(x_reshaped)
+
+        # # usando einops e supponendo B, C, H, W come input (x_rearranged =  x_reshaped)
+        # x_rearranged = rearrange(x, 'b c (h s1) (w s2) -> b (h w) (s1 s2 c)', s1=self.patch_size, s2=self.patch_size)
+        # print("x_rearranged shape: ", x_rearranged.shape)
+        # out = self.linear_embedding(x_rearranged)
+
+        return out
+
 class MLP(nn.Module):
     def __init__(self, in_dim, hidden_dim, out_dim):
         '''
@@ -76,7 +124,7 @@ class MLP_mixer(nn.Module):
         # - Global average pooling
         # - FC finale
 
-    def __init__(self, img_h_w, patch_dim,  n_classes, num_mixers_layers, hidden_dim_mlp_token, hidden_dim_mlp_channel):
+    def __init__(self, img_h_w = 36, patch_dim = 12, n_channels = 16,  n_classes = 100, num_mixers_layers = 7, hidden_dim_mlp_token = 10, hidden_dim_mlp_channel = 10, fc_head_in_dim = 1000):
         # :param patch_dims: dimensions of patch, will allow calculation of number of patches. Square image => square patches i.e. patch_dims = width = height
         # :param n_channels: aka patch latent representation dimention
         # :param hidden_dim_mlp_token: hidden dimension size for first mlp blocks (token mixing)
@@ -90,9 +138,12 @@ class MLP_mixer(nn.Module):
         # 1) self.patch_embedding, in comune con ViT 
         # da (1) viene ricavato n_channels perchè è la dimensione del codice latente
         num_patches = img_h_w // patch_dim # integer division
-        self.mixerlayers = nn.ModuleList([MixerLayer( ... )]) #TODO
+        self.embedder = PatchEmbedding((img_h_w, img_h_w), patch_size=patch_dim, embed_dim=n_channels)
+        self.mixerlayers = nn.ModuleList([MixerLayer(num_patches, n_channels, hidden_dim_mlp_token, hidden_dim_mlp_channel) for _ in range(num_mixers_layers)]) #TODO
+        # should we layer norm before this?
+        self.fc_head = nn.Linear(fc_head_in_dim, n_classes)
+
+    def forward(self, x):
+        #1 image tensor to patch embeddings tensor
+        embedding = self.embedder(x) # patch embeddings (batch size, n_patches, n_channels)
         
-        for i in range(num_mixers_layers):
-
-
-
