@@ -2,11 +2,11 @@ import os
 from unittest.mock import patch
 import torch
 from torch import nn
+import einops
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class PatchEmbedding(nn.Module):
-    # da chiara https://github.com/chiaraalbi46/VisionTransformer/blob/18783de487df1ac31f7c5cb153c10a79ef2a4586/embeddings.py#L10
     """ Patch grid and flattening (reshaping the input tensor), then linear embedding.
     Parameters
     ----------
@@ -25,7 +25,8 @@ class PatchEmbedding(nn.Module):
     linear_embedding : nn.Linear
             Linear embedding of the patches
     """
-    def __init__(self, img_size=(36, 36), in_chans=3, patch_size=16, embed_dim=768):
+
+    def __init__(self, img_size=(224, 224), in_chans=3, patch_size=16, embed_dim=768):
         super().__init__()
         self.img_size = img_size  # tupla
         self.patch_size = patch_size
@@ -37,19 +38,23 @@ class PatchEmbedding(nn.Module):
 
         self.n_patches = (self.img_size[0] * self.img_size[1]) // (self.patch_size * self.patch_size)  # H*W / P^2
         # // divisione intera
+        # todo: valutare se lasciare qui o mettere in ViT
         self.linear_embedding = nn.Linear((self.patch_size * self.patch_size) * self.in_chans, embed_dim)
         # bias=True di default
-    
-    def forward(self, x):
-        b, c, h, w = x.shape
-        x = x.permute(0, 2, 3, 1)  # (b, h, w, c)
-        x_reshaped = x.reshape(b, self.n_patches, self.patch_size * self.patch_size * self.in_chans)  # b, n, p^2 * c
-        out = self.linear_embedding(x_reshaped)
 
-        # # usando einops e supponendo B, C, H, W come input (x_rearranged =  x_reshaped)
-        # x_rearranged = rearrange(x, 'b c (h s1) (w s2) -> b (h w) (s1 s2 c)', s1=self.patch_size, s2=self.patch_size)
-        # print("x_rearranged shape: ", x_rearranged.shape)
-        # out = self.linear_embedding(x_rearranged)
+    def forward(self, x, plot=False):
+        b, c, h, w = x.shape
+
+        x = x.reshape(b, c, h // self.patch_size, self.patch_size, w // self.patch_size, self.patch_size)  # (b, c, h/p, p, w/p, p)
+        x = x.permute(0, 2, 4, 1, 3, 5)  # (b, h/p, w/p, c, p, p)
+        x = x.flatten(1, 2)  # (b, h*w / p^2, c, p, p)
+        # h*w / p^2 = number of patches, each patch is a matrix pxp with c channels
+        #if plot:
+         #   plot_embed_patches(x)
+
+        x = x.flatten(2, 4)  # (b, h*w / p^2, c*p^2)
+
+        out = self.linear_embedding(x)  # da commentare se faccio il plot delle patch
 
         return out
 
@@ -136,7 +141,16 @@ class MLP_mixer(nn.Module):
         num_patches = (img_h_w // patch_dim) **2 # integer division, squared because image is a square duh
         if self.debug: 
             print(f"NUM PATCHES: {num_patches}")
-        self.embedder = PatchEmbedding((img_h_w, img_h_w), patch_size=patch_dim, embed_dim=n_channels)
+        #self.embedder = PatchEmbedding((img_h_w, img_h_w), patch_size=patch_dim, embed_dim=n_channels)
+        
+        # linear embedder con conv e einops
+        self.patch_embedder = nn.Conv2d(
+            3,
+            n_channels, #is dim
+            kernel_size=patch_dim,
+            stride=patch_dim,
+        )
+        
         self.mixerlayers = nn.ModuleList([MixerLayer(num_patches, n_channels, hidden_dim_mlp_token, hidden_dim_mlp_channel) for _ in range(num_mixers_layers)]) #TODO
         #self.mixerlayers = MixerLayer(num_patches, n_channels, hidden_dim_mlp_token, hidden_dim_mlp_channel)
         # in implementation reported in the paper, there is also a layernorm, which is not present in the macroscopic scheme
@@ -145,7 +159,16 @@ class MLP_mixer(nn.Module):
 
     def forward(self, x):
         # 1 image tensor to patch embeddings tensor
-        out = self.embedder(x) # patch embeddings (batch size, n_patches, n_channels) check: [100, 9, 16]
+        #out = self.embedder(x) # patch embeddings (batch size, n_patches, n_channels) check: [100, 9, 16]
+        
+        # embedding come in paper
+        x = self.patch_embedder(
+            x
+        )  # (n_samples, hidden_dim, n_patches ** (1/2), n_patches ** (1/2))
+        out = einops.rearrange(
+            x, "n c h w -> n (h w) c"
+        )  # (n_samples, n_patches, hidden_dim)
+        
         # TODO: nel paper c'è scritto "per patch fully connected" ma non mi è molto chiaro
         if self.debug: 
             print(f"Embedding size: {out.size()}")
