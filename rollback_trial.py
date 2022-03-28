@@ -2,8 +2,30 @@ from comet_ml import Experiment
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from utils import * 
+import time
+
 
 train_portion = 0.7
+
+with open('set_hyper_params.json') as json_file:
+    params = json.load(json_file)
+
+#hyperparameters
+patch_dims = params['patch_width_and_height']
+# variable_name = value #paper value
+n_channels = params['hidden_dim_size (n_channels)'] #128 #256 #100 #512 #embed dim
+loss_func = nn.CrossEntropyLoss()
+learning_rate = params['learning_rate']
+weight_decay = params['weight_decay']
+num_layers = params['number_of_layers'] #8
+mlp_dc_dimension = params['mlp_dc_dimension'] #512 #1024 #2048 # dc è la dimensione del channel mixing (l'ultimo mlp)
+mlp_ds_dimension = params['mlp_ds_dimension'] #64 #128 #256 # ds è la dimensione del token mixing (il primo)
+mixup_alpha = params['mixup_alpha']
+num_epochs = params['epochs']
+batch_size = params['batch_size']
+randAugm_numops = params['rand_augm_numops']
+randAugm_magn = params['rand_augm_magnitude']
 
 #controllare che len(val) è len(train)
 
@@ -49,8 +71,8 @@ import matplotlib.pyplot as plt
 img_sample = samples[0]
 print(img_sample.shape)
 print(img_sample.shape)
-plt.imshow(img_sample.permute(1, 2, 0))
-plt.show()
+#plt.imshow(img_sample.permute(1, 2, 0))
+#plt.show()
 
 from mlp_mixer import *
 from tqdm.notebook import tqdm
@@ -86,26 +108,21 @@ experiment = Experiment(
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 image_width_height = img_sample.shape[1]
-patch_dims = 4
-# variable_name = value #paper value
-n_channels = 32 #128 #256 #100 #512 #embed dim
-loss_func = nn.CrossEntropyLoss()
-learning_rate = 0.001
-num_layers = 3 #8
-mlp_dc_dimension = 128 #512 #1024 #2048 # dc è la dimensione del channel mixing (l'ultimo mlp)
-mlp_ds_dimension = 32 #64 #128 #256 # ds è la dimensione del token mixing (il primo)
 
 model = MLP_mixer(img_h_w=image_width_height, patch_dim=patch_dims, n_channels=n_channels, num_mixers_layers=num_layers,
     hidden_dim_mlp_token=mlp_ds_dimension, hidden_dim_mlp_channel=mlp_dc_dimension) #in this case 2 patches 16x16
-optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay=1e-5) 
+optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay=1e-5) #weight decay 0.1?
 
 num_epochs = 200
 steps_total = len(train_loader)
 
 #ATTENZIONE: CAMBIARE IPERPARAMETRI ***PRIMAAAA*** DEL DICT SUCCESSIVO
 
+
 hyper_params = {
     "dataset": root,
+    "rand_augm_numops": randAugm_numops,
+    "rand_augm_magnitude": randAugm_magn,
     "comment": 'added weight decay',
     "train_size": len(train_loader),
     "validation_size": len(val_loader),
@@ -113,6 +130,8 @@ hyper_params = {
     "epochs": num_epochs,
     "steps": steps_total,
     "batch_size": batch_size,
+    "mixup_alpha": mixup_alpha, 
+    "weight_decay": weight_decay,
     "image_width_and_height": image_width_height,
     "patch_width_and_height": patch_dims,
     "hidden_dim_size (n_channels)": n_channels,
@@ -129,6 +148,7 @@ with open(model_path+"/params.json", "w") as file:
 model.to(device)
 # training loop
 for epoch in tqdm(range(num_epochs)):
+    start = time.time()
     model.train()
     train_accuracy = 0
     for i, (images, labels) in enumerate(tqdm(train_loader)):
@@ -151,8 +171,12 @@ for epoch in tqdm(range(num_epochs)):
     print(f"Loss of epoch {epoch+1}: {loss.item():.4f}")
     train_accuracy /= len(train_loader)
     #print(f"TRAIN LOADER LENGTH: {len(train_loader)}")
+    end = time.time()
+    elapsed = end - start
     experiment.log_metric("train epoch loss", loss.item(), step=epoch)
     experiment.log_metric("mean train epoch accuracy", train_accuracy, step=epoch)
+    experiment.log_metric("epoch time", elapsed, step = epoch)
+
     # validation
     with torch.no_grad():
         model.eval()

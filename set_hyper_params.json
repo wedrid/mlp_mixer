@@ -10,7 +10,7 @@
     "weight_decay": 0.1,
     "patch_width_and_height": 4,
     "hidden_dim_size (n_channels)": 64,
-    "number_of_layers": 7,
+    "number_of_layers": 5,
     "mlp_dc_dimension": 256,
     "mlp_ds_dimension": 64
 }
