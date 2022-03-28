@@ -4,6 +4,9 @@ import torchvision
 import torchvision.transforms as transforms
 from utils import * 
 import time
+from mlp_mixer import *
+from tqdm.notebook import tqdm
+from sklearn.metrics import accuracy_score
 import json
 
 train_portion = 0.7
@@ -74,10 +77,7 @@ print(img_sample.shape)
 #plt.imshow(img_sample.permute(1, 2, 0))
 #plt.show()
 
-from mlp_mixer import *
-from tqdm.notebook import tqdm
-from sklearn.metrics import accuracy_score
-import json
+
 
 def get_accuracy(predicted, true_labels):
     predicted = torch.argmax(predicted.cpu(), dim=1)
