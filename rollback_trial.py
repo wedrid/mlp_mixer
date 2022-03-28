@@ -33,7 +33,7 @@ randAugm_magn = params['rand_augm_magnitude']
 #controllare che len(val) è len(train)
 
 #hyperparameters
-batch_size = 250
+batch_size = params['batch_size']
 
 #pad_totensor_transform = transforms.Compose([transforms.Pad(2), transforms.ToTensor()]) # does the padding, images 32x32 become 36x36 (symmetric increase) so that are divisible by three and patches are 12x12
 pad_totensor_transform = transforms.Compose([transforms.ToTensor()]) #no pad, no normalization
@@ -78,11 +78,11 @@ print(img_sample.shape)
 #plt.show()
 
 
-
+'''
 def get_accuracy(predicted, true_labels):
     predicted = torch.argmax(predicted.cpu(), dim=1)
     return accuracy_score(predicted, true_labels.cpu()) #forse questi passaggi a cpu non sono molto efficienti..
-
+'''
 def generate_folder():
     import time
     import os
