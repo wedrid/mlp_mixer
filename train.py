@@ -36,9 +36,9 @@ randAugm_magn = params['rand_augm_magnitude']
 batch_size = params['batch_size']
 
 #pad_totensor_transform = transforms.Compose([transforms.Pad(2), transforms.ToTensor()]) # does the padding, images 32x32 become 36x36 (symmetric increase) so that are divisible by three and patches are 12x12
-pad_totensor_transform = transforms.Compose(
+pad_totensor_transform = transforms.Compose([
     transforms.RandAugment(num_ops = randAugm_numops,magnitude = randAugm_magn ),
-    [transforms.ToTensor()]) #no pad, no normalization
+    transforms.ToTensor()]) #no pad, no normalization
 
 root = './cifar100_data' #if not in lab
 root = '../datasets/cifar100'
