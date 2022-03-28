@@ -145,16 +145,9 @@ for epoch in tqdm(range(num_epochs)):
         # [100, 3, 36, 36] is what is returned by iterator
         images = images.to(device)
         labels = labels.to(device)
-        if not mixup: #without mixup regularization
             # forward pass
-            predicted = model(images)
-            loss = loss_func(predicted, labels)
-            
-        else:
-            images, labels_a, labels_b, lam = mixup_data(images, labels, alpha=mixup_alpha, device=device)
-            #images, labels_a, labels_b = map(Variable, ) no because Variable is deprecated
-            predicted = model(images)
-            loss = mixup_criterion(loss_func, predicted, labels_a, labels_b, lam)
+        predicted = model(images)
+        loss = loss_func(predicted, labels)
             
         train_accuracy += get_accuracy(predicted, labels)
         # backwards pass
