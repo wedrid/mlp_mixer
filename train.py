@@ -46,17 +46,18 @@ else:
 #pad_totensor_transform = transforms.Compose([transforms.ToTensor()]) #no pad, no normalization
 
 my_transforms = transforms.Compose([ 
+                            transforms.Resize((224,224)),
                             transforms.RandAugment(num_ops = randAugm_numops,magnitude = randAugm_magn ),
                             transforms.ToTensor(), #nota importante, ToTensor dev'essere sempre come ultima trasformazione
                             ])
 
-root = './cifar100_data' #if not in lab
-#root = '../datasets/cifar100'
+root = './imagenet' #if not in lab
+#root = '../datasets/imagenet'
 
 
-dataset = torchvision.datasets.CIFAR100(root=root, train=True, transform = my_transforms, download=True)
+dataset = torchvision.datasets.ImageNet(root=root, train=True, transform = my_transforms, download=True)
 train_subset, val_subset = torch.utils.data.random_split(dataset, [int(train_portion*len(dataset)), len(dataset) - int(train_portion*len(dataset))], generator=torch.Generator().manual_seed(1))
-test_dataset = torchvision.datasets.CIFAR100(root=root, train=False, transform = my_transforms)
+test_dataset = torchvision.datasets.ImageNet(root=root, train=False, transform = transforms.ToTensor())
 
 
 train_loader = torch.utils.data.DataLoader(dataset=train_subset, shuffle=True, batch_size=batch_size)
@@ -87,7 +88,7 @@ experiment = Experiment(
 )
 if mixup: 
     experiment.add_tag('mixup')
-if 
+
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
