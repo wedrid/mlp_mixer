@@ -1,7 +1,7 @@
 {
     "dataset": "CIFAR100",
-    "rand_augm_numops": 1,
-    "rand_augm_magnitude": 5,
+    "rand_augm_numops": 2,
+    "rand_augm_magnitude": 10,
     "comment": "randaugm",
     "learning_rate": 0.001,
     "epochs": 1000,
