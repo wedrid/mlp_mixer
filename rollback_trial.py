@@ -42,9 +42,9 @@ root = './cifar100_data' #if not in lab
 root = '../datasets/cifar100'
 
 
-dataset = torchvision.datasets.CIFAR10(root=root, train=True, transform=pad_totensor_transform, download=True)
+dataset = torchvision.datasets.CIFAR100(root=root, train=True, transform=pad_totensor_transform, download=True)
 train_subset, val_subset = torch.utils.data.random_split(dataset, [int(train_portion*len(dataset)), len(dataset) - int(train_portion*len(dataset))], generator=torch.Generator().manual_seed(1))
-test_dataset = torchvision.datasets.CIFAR10(root=root, train=False, transform=pad_totensor_transform)
+test_dataset = torchvision.datasets.CIFAR100(root=root, train=False, transform=pad_totensor_transform)
 
 
 train_loader = torch.utils.data.DataLoader(dataset=train_subset, shuffle=True, batch_size=batch_size)
