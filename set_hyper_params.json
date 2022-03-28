@@ -1,16 +1,16 @@
 {
-    "dataset": "imageNet",
+    "dataset": "CIFAR100",
     "rand_augm_numops": 1,
-    "rand_augm_magnitude": 10,
-    "comment": "trial no randaugm",
+    "rand_augm_magnitude": 5,
+    "comment": "randaugm",
     "learning_rate": 0.001,
     "epochs": 1000,
     "batch_size": 250,
     "mixup_alpha": -1,
     "weight_decay": 0.1,
     "patch_width_and_height": 4,
-    "hidden_dim_size (n_channels)": 256,
+    "hidden_dim_size (n_channels)": 64,
     "number_of_layers": 7,
-    "mlp_dc_dimension": 512,
+    "mlp_dc_dimension": 256,
     "mlp_ds_dimension": 64
 }
