@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 #controllare che len(val) è len(train)
 
-def getCIFAR100Loaders(in_params, batch_size, root='./cifar100_data'):
+def getCIFAR100Loaders(in_params, root='./cifar100_data'):
     randAugm_numops = in_params['rand_augm_numops']
     randAugm_magn = in_params['rand_augm_magnitude']
     pad_totensor_transform = transforms.Compose([
@@ -24,21 +24,21 @@ def getCIFAR100Loaders(in_params, batch_size, root='./cifar100_data'):
     test_dataset = torchvision.datasets.CIFAR100(root=root, train=False, transform=pad_totensor_transform)
 
 
-    train_loader = torch.utils.data.DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size)
+    train_loader = torch.utils.data.DataLoader(dataset=dataset, shuffle=True, batch_size=in_params['batch_size'])
     val_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
-    print(f"BATCH SIZE: {batch_size}")
+    print(f"BATCH SIZE: {in_params['batch_size']}")
     print(f"Tran subset len: {len(dataset)}")
     print(f"Tran loader len: {len(train_loader)}")
-    print(f"Test: {len(dataset)/batch_size}")
+    print(f"Test: {len(dataset)/in_params['batch_size']}")
 
     print(f"Val/test subset len: {len(test_dataset)}")
     print(f"Val/test subset len: {len(val_loader)}")
-    print(f"Val/Test: {len(test_dataset)/batch_size}")
+    print(f"Val/Test: {len(test_dataset)/in_params['batch_size']}")
 
     print(f"Test subset len: {len(test_dataset)}")
     print(f"Test subset len: {len(test_loader)}")
-    print(f"Test: {len(test_dataset)/batch_size}")
+    print(f"Test: {len(test_dataset)/in_params['batch_size']}")
     return train_loader, test_loader
 
 def train(in_hyperparams, train_loader, val_loader, model=None):
@@ -172,6 +172,8 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
 
 if __name__ == "__main__":
     with open('set_hyper_params.json') as json_file:
-        in_params = json.load(json_file)
-
+        in_hyperparams = json.load(json_file)
+    
+    train_loader, val_loader = getCIFAR100Loaders(in_hyperparams)
+    train(in_hyperparams, train_loader, val_loader)
     
