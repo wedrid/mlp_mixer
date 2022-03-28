@@ -25,7 +25,7 @@ def getCIFAR100Loaders(in_params, root='./cifar100_data'):
 
 
     train_loader = torch.utils.data.DataLoader(dataset=dataset, shuffle=True, batch_size=in_params['batch_size'])
-    val_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
+    val_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=in_params['batch_size'], shuffle=False)
 
     print(f"BATCH SIZE: {in_params['batch_size']}")
     print(f"Tran subset len: {len(dataset)}")
@@ -37,9 +37,9 @@ def getCIFAR100Loaders(in_params, root='./cifar100_data'):
     print(f"Val/Test: {len(test_dataset)/in_params['batch_size']}")
 
     print(f"Test subset len: {len(test_dataset)}")
-    print(f"Test subset len: {len(test_loader)}")
+    print(f"Test subset len: {len(val_loader)}")
     print(f"Test: {len(test_dataset)/in_params['batch_size']}")
-    return train_loader, test_loader
+    return train_loader, val_loader
 
 def train(in_hyperparams, train_loader, val_loader, model=None):
     #hyperparameters
@@ -90,8 +90,8 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
 
     out_hyperparams = {
         "dataset": "-",
-        "rand_augm_numops": in_params['rand_augm_numops'],
-        "rand_augm_magnitude": in_params['rand_augm_magnitude'],
+        "rand_augm_numops": in_hyperparams['rand_augm_numops'],
+        "rand_augm_magnitude": in_hyperparams['rand_augm_magnitude'],
         "comment": 'added weight decay',
         "train_size": len(train_loader),
         "validation_size": len(val_loader),
