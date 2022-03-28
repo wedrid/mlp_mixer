@@ -10,37 +10,15 @@ from sklearn.metrics import accuracy_score
 import json
 import matplotlib.pyplot as plt
 
-train_portion = 0.7
-
-
 
 #controllare che len(val) è len(train)
 
-def train(hyperparams, model=None):
-    #hyperparameters
-    patch_dims = params['patch_width_and_height']
-    # variable_name = value #paper value
-    n_channels = params['hidden_dim_size (n_channels)'] #128 #256 #100 #512 #embed dim
-    loss_func = nn.CrossEntropyLoss()
-    learning_rate = params['learning_rate']
-    weight_decay = params['weight_decay']
-    num_layers = params['number_of_layers'] #8
-    mlp_dc_dimension = params['mlp_dc_dimension'] #512 #1024 #2048 # dc è la dimensione del channel mixing (l'ultimo mlp)
-    mlp_ds_dimension = params['mlp_ds_dimension'] #64 #128 #256 # ds è la dimensione del token mixing (il primo)
-    mixup_alpha = params['mixup_alpha']
-    num_epochs = params['epochs']
-    batch_size = params['batch_size']
-    randAugm_numops = params['rand_augm_numops']
-    randAugm_magn = params['rand_augm_magnitude']
-
-    #pad_totensor_transform = transforms.Compose([transforms.Pad(2), transforms.ToTensor()]) # does the padding, images 32x32 become 36x36 (symmetric increase) so that are divisible by three and patches are 12x12
+def getCIFAR100Loaders(in_params, batch_size, root='./cifar100_data'):
+    randAugm_numops = in_params['rand_augm_numops']
+    randAugm_magn = in_params['rand_augm_magnitude']
     pad_totensor_transform = transforms.Compose([
-        transforms.RandAugment(num_ops = randAugm_numops,magnitude = randAugm_magn ),
+        transforms.RandAugment(num_ops = randAugm_numops,magnitude = randAugm_magn),
         transforms.ToTensor()]) #no pad, no normalization
-
-    root = './cifar100_data' #if not in lab
-    root = '../datasets/cifar100'
-
 
     dataset = torchvision.datasets.CIFAR100(root=root, train=True, transform=pad_totensor_transform, download=True)
     test_dataset = torchvision.datasets.CIFAR100(root=root, train=False, transform=pad_totensor_transform)
@@ -61,6 +39,24 @@ def train(hyperparams, model=None):
     print(f"Test subset len: {len(test_dataset)}")
     print(f"Test subset len: {len(test_loader)}")
     print(f"Test: {len(test_dataset)/batch_size}")
+    return train_loader, test_loader
+
+def train(in_hyperparams, train_loader, val_loader, model=None):
+    #hyperparameters
+    patch_dims = in_hyperparams['patch_width_and_height']
+    # variable_name = value #paper value
+    n_channels = in_hyperparams['hidden_dim_size (n_channels)'] #128 #256 #100 #512 #embed dim
+    loss_func = nn.CrossEntropyLoss()
+    learning_rate = in_hyperparams['learning_rate']
+    weight_decay = in_hyperparams['weight_decay']
+    num_layers = in_hyperparams['number_of_layers'] #8
+    mlp_dc_dimension = in_hyperparams['mlp_dc_dimension'] #512 #1024 #2048 # dc è la dimensione del channel mixing (l'ultimo mlp)
+    mlp_ds_dimension = in_hyperparams['mlp_ds_dimension'] #64 #128 #256 # ds è la dimensione del token mixing (il primo)
+    mixup_alpha = in_hyperparams['mixup_alpha']
+    num_epochs = in_hyperparams['epochs']
+    batch_size = in_hyperparams['batch_size']
+
+
 
     examples = iter(train_loader)
     samples, labels = examples.next()
@@ -92,10 +88,10 @@ def train(hyperparams, model=None):
 
     #ATTENZIONE: CAMBIARE IPERPARAMETRI ***PRIMAAAA*** DEL DICT SUCCESSIVO
 
-    hyper_params = {
-        "dataset": root,
-        "rand_augm_numops": randAugm_numops,
-        "rand_augm_magnitude": randAugm_magn,
+    out_hyperparams = {
+        "dataset": "-",
+        "rand_augm_numops": in_params['rand_augm_numops'],
+        "rand_augm_magnitude": in_params['rand_augm_magnitude'],
         "comment": 'added weight decay',
         "train_size": len(train_loader),
         "validation_size": len(val_loader),
@@ -113,10 +109,10 @@ def train(hyperparams, model=None):
         "mlp_ds_dimension": mlp_ds_dimension
     }
 
-    experiment.log_parameters(hyper_params)
+    experiment.log_parameters(out_hyperparams)
     model_path = generate_folder()
-    with open(model_path+"/params.json", "w") as file:
-        json.dump(hyper_params, file, indent=4)
+    with open(model_path+"/out_hyperparams.json", "w") as file:
+        json.dump(out_hyperparams, file, indent=4)
 
     model.to(device)
     # training loop
@@ -176,6 +172,6 @@ def train(hyperparams, model=None):
 
 if __name__ == "__main__":
     with open('set_hyper_params.json') as json_file:
-        params = json.load(json_file)
+        in_params = json.load(json_file)
 
     
