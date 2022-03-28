@@ -47,7 +47,7 @@ else:
 
 my_transforms = transforms.Compose([ 
                             #transforms.Resize((224,224)),
-                            transforms.RandAugment(num_ops = randAugm_numops,magnitude = randAugm_magn ),
+                            #transforms.RandAugment(num_ops = randAugm_numops,magnitude = randAugm_magn ),
                             transforms.ToTensor(), #nota importante, ToTensor dev'essere sempre come ultima trasformazione
                             ])
 
