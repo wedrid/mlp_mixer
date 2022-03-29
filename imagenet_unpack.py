@@ -9,7 +9,7 @@ from torchvision.utils import save_image
 from argparse import ArgumentParser
 
 # usage example: 
-# python imagenet_unpack.py -i "../datasets/imagenet/val_data" -o "../datasets/imagenet/validation/"
+# python imagenet_unpack.py -i "../datasets/imagenet/val_data" -o "../datasets/imagenet/validation/" -p "1_"
 
 parser = ArgumentParser()
 parser.add_argument("-i", "--infile", dest="in_file",
