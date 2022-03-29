@@ -16,6 +16,8 @@ parser.add_argument("-i", "--infile", dest="in_file",
                     help="pickle file ( pickle )", metavar="FILE")
 parser.add_argument("-o", "--outroot", dest="out_file", 
                     help="out root directory")
+parser.add_argument("-p", "--prefix", dest="prefix", 
+                    help="out root directory")
 
 args = parser.parse_args()
 print(args.in_file)
@@ -37,6 +39,6 @@ for i in range(1, 1001):
 
 for i in tqdm(range(len(labels))):
     np_tensor = torch.Tensor(np.array(tensors[i]).reshape((3,64,64)))/255
-    save_image(np_tensor, root + "/" + str(labels[i]) + "/"+ str(i) + '.png')
+    save_image(np_tensor, root + "/" + str(labels[i]) + "/" + args.prefix + str(i) + '.png')
     #plt.imsave(root + "/" + str(labels[i]) + "/"+ str(i) + '.png', np_tensor)
     #print(labels[i])
