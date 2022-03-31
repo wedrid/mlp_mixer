@@ -11,7 +11,7 @@ import json
 import matplotlib.pyplot as plt
 
 #controllare che len(val) è len(train)
-log = True
+log = False
 
 def getCIFAR100Loaders(in_params, root='./cifar100_data'):
     randAugm_numops = in_params['rand_augm_numops']
@@ -105,9 +105,10 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
         #project_name="mlp-mixer",
         #workspace="wedrid",)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
     image_width_height = img_sample.shape[1]
 
-    model = MLP_mixer(img_h_w=image_width_height, patch_dim=patch_dims, n_channels=n_channels, num_mixers_layers=num_layers,
+    model = MLP_mixer(img_h_w=image_width_height, patch_dim=patch_dims, n_channels=n_channels, n_classes=in_hyperparams['num_classes'], num_mixers_layers=num_layers,
         hidden_dim_mlp_token=mlp_ds_dimension, hidden_dim_mlp_channel=mlp_dc_dimension) #in this case 2 patches 16x16
     
 
@@ -124,6 +125,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
 
     out_hyperparams = {
         "dataset": in_hyperparams['dataset'],
+        "num_classes": in_hyperparams['num_classes'],
         "rand_augm_numops": in_hyperparams['rand_augm_numops'],
         "rand_augm_magnitude": in_hyperparams['rand_augm_magnitude'],
         "comment": 'added weight decay',
@@ -161,7 +163,10 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
             # [100, 3, 36, 36] is what is returned by iterator
             images = images.to(device)
             labels = labels.to(device)
-            
+            print("ATTENZIONE")
+            print(images.shape)
+            print(f"labels shape: {labels.shape}")
+            print(f"Labels MAX: {max(labels)}, MIN: {min(labels)}")
             # forward pass
             predicted = model(images)
             loss = loss_func(predicted, labels)
@@ -232,7 +237,9 @@ if __name__ == "__main__":
             in_hyperparams = json.load(json_file)
         if in_hyperparams['dataset'] == "CIFAR100":
             train_loader, val_loader = getCIFAR100Loaders(in_hyperparams)
+            in_hyperparams['num_classes'] = 100
         elif in_hyperparams['dataset'] == "imagenet":
+            in_hyperparams['num_classes'] = 1000
             train_loader, val_loader = getImagenetLoaders(in_hyperparams)
 
         train(in_hyperparams, train_loader, val_loader)
