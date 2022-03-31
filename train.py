@@ -225,8 +225,8 @@ if __name__ == "__main__":
         with open('set_hyper_params.json') as json_file:
             in_hyperparams = json.load(json_file)
         
-        train_loader, val_loader = getCIFAR100Loaders(in_hyperparams)
-        #train_loader, val_loader = getImagenetLoaders(in_hyperparams)
+        #train_loader, val_loader = getCIFAR100Loaders(in_hyperparams)
+        train_loader, val_loader = getImagenetLoaders(in_hyperparams)
 
         train(in_hyperparams, train_loader, val_loader)
     
