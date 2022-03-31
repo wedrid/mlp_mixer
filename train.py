@@ -170,7 +170,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
             # backwards pass
             optimizer.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm(model.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             
             if False and (i+1) % 100:
@@ -205,7 +205,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
                 experiment.log_metric("val epoch loss", loss.item(), step=epoch)
                 experiment.log_metric("mean val epoch accuracy", val_accuracy, step=epoch)
         
-        if epoch % 20 == 0:
+        if epoch % 10 == 0:
             torch.save(model.state_dict(), model_path + f"checkpoint_epch_{epoch}.pth")
     torch.save(model.state_dict(), model_path + f"final.pth") 
 
