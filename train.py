@@ -195,7 +195,9 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
                 # [100, 3, 36, 36] is what is returned by iterator
                 images = images.to(device)
                 labels = labels.to(device)
-                
+                print("ATTENZIOEN")
+                print(images.shape)
+                print(labels.shape)
                 # forward pass
                 predicted = model(images)
                 loss = loss_func(predicted, labels)
