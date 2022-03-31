@@ -165,7 +165,8 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
             # forward pass
             predicted = model(images)
             loss = loss_func(predicted, labels)
-            train_accuracy += get_accuracy(predicted, labels)
+            train_accuracy += (predicted.argmax(dim=-1) == labels).float().mean()
+            #train_accuracy += get_accuracy(predicted, labels)
 
             # backwards pass
             optimizer.zero_grad()
@@ -198,7 +199,8 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
                 # forward pass
                 predicted = model(images)
                 loss = loss_func(predicted, labels)
-                val_accuracy += get_accuracy(predicted, labels)
+                #val_accuracy += get_accuracy(predicted, labels)
+                val_accuracy += (predicted.argmax(dim=-1) == labels).float().mean()
             #print(f"Lenght val loader: {len(val_loader)}, counter: {temp}")
             val_accuracy /= len(val_loader) 
             if log: 
