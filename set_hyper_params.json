@@ -7,7 +7,7 @@
     "epochs": 500,
     "batch_size": 512,
     "mixup_alpha": -1,
-    "weight_decay": -1,
+    "weight_decay": 0.1,
     "patch_width_and_height": 8,
     "hidden_dim_size (n_channels)": 128,
     "number_of_layers": 8,
