@@ -193,11 +193,12 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
             temp = 0
             for i, (images, labels) in enumerate(tqdm(val_loader)): #numero esempi/batchsize TODO check
                 # [100, 3, 36, 36] is what is returned by iterator
-                images = images.to(device)
-                labels = labels.to(device)
                 print("ATTENZIOEN")
                 print(images.shape)
                 print(labels.shape)
+                images = images.to(device)
+                labels = labels.to(device)
+                
                 # forward pass
                 predicted = model(images)
                 loss = loss_func(predicted, labels)
