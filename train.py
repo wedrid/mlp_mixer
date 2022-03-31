@@ -123,7 +123,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
     #ATTENZIONE: CAMBIARE IPERPARAMETRI ***PRIMAAAA*** DEL DICT SUCCESSIVO
 
     out_hyperparams = {
-        "dataset": "-",
+        "dataset": in_hyperparams['dataset'],
         "rand_augm_numops": in_hyperparams['rand_augm_numops'],
         "rand_augm_magnitude": in_hyperparams['rand_augm_magnitude'],
         "comment": 'added weight decay',
@@ -225,9 +225,10 @@ if __name__ == "__main__":
     else:
         with open('set_hyper_params.json') as json_file:
             in_hyperparams = json.load(json_file)
-        
-        #train_loader, val_loader = getCIFAR100Loaders(in_hyperparams)
-        train_loader, val_loader = getImagenetLoaders(in_hyperparams)
+        if in_hyperparams['dataset'] == "CIFAR100":
+            train_loader, val_loader = getCIFAR100Loaders(in_hyperparams)
+        elif in_hyperparams['dataset'] == "imagenet":
+            train_loader, val_loader = getImagenetLoaders(in_hyperparams)
 
         train(in_hyperparams, train_loader, val_loader)
     

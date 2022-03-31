@@ -1,5 +1,5 @@
 {
-    "dataset": "CIFAR100",
+    "dataset": "imagenet",
     "rand_augm_numops": 2,
     "rand_augm_magnitude": 10,
     "comment": "randaugm",
