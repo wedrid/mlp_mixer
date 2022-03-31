@@ -4,8 +4,8 @@ import numpy as np
 
 
 def get_accuracy(predicted, true_labels):
-    predicted = torch.argmax(predicted.cpu(), dim=1)
-    return accuracy_score(predicted, true_labels.cpu()) #forse questi passaggi a cpu non sono molto efficienti..
+    predicted = torch.argmax(predicted, dim=1)
+    return accuracy_score(predicted, true_labels) #forse questi passaggi a cpu non sono molto efficienti..
 
 def generate_folder():
     import time
