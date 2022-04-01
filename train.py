@@ -11,7 +11,7 @@ import json
 import matplotlib.pyplot as plt
 
 #controllare che len(val) è len(train)
-log = False
+log = True
 
 def getCIFAR100Loaders(in_params, root='./cifar100_data'):
     randAugm_numops = in_params['rand_augm_numops']
