@@ -5,7 +5,7 @@
     "comment": "randaugm",
     "learning_rate": 0.001,
     "epochs": 500,
-    "batch_size": 512,
+    "batch_size": 1024,
     "mixup_alpha": -1,
     "weight_decay": 0.1,
     "patch_width_and_height": 8,

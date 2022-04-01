@@ -111,11 +111,12 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
         hidden_dim_mlp_token=mlp_ds_dimension, hidden_dim_mlp_channel=mlp_dc_dimension) #in this case 2 patches 16x16
     
 
-    if pretrained_model_path is not None:
+    if pretrained_model_path is not None and False:
         model.load_state_dict(torch.load(pretrained_model_path))
     
     if weight_decay > 0: 
         optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay=weight_decay) #weight decay 0.1?
+        print(f"WEIGHT DECAY IS: {weight_decay}")
     else: 
         optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
     steps_total = len(train_loader)
@@ -157,7 +158,6 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
         start = time.time()
         model.train()
         train_accuracy = 0
-        train_accuracy1 = 0
         for i, (images, labels) in enumerate(tqdm(train_loader)):
             #print("HELLO")
             # [100, 3, 36, 36] is what is returned by iterator
@@ -168,8 +168,8 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
             loss = loss_func(predicted, labels)
             train_accuracy += ((predicted.argmax(dim=-1) == labels).float().mean()).item()
             #train_accuracy1 += get_accuracy(predicted, labels)
-            print(f"\nACCURACY {(train_accuracy)}")
-            print(f"prev acuracy {train_accuracy1}")
+            #print(f"\nACCURACY {(train_accuracy)}")
+            #print(f"prev acuracy {train_accuracy1}")
             #train_accuracy += get_accuracy(predicted, labels)
 
             # backwards pass
@@ -195,13 +195,8 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
         with torch.no_grad():
             model.eval()
             val_accuracy = 0
-            val_accuracy1 = 0
-            temp = 0
             for i, (images, labels) in enumerate(tqdm(val_loader)): #numero esempi/batchsize TODO check
                 # [100, 3, 36, 36] is what is returned by iterator
-                print("ATTENZIOEN")
-                print(images.shape)
-                print(labels.shape)
                 images = images.to(device)
                 labels = labels.to(device)
                 
@@ -210,7 +205,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
                 loss = loss_func(predicted, labels)
                 #val_accuracy1 += get_accuracy(predicted, labels)
                 val_accuracy += ((predicted.argmax(dim=-1) == labels).float().mean()).item()
-                print(f"\n val accuracy {val_accuracy}, previous: {val_accuracy1}")
+                #print(f"\n val accuracy {val_accuracy}, previous: {val_accuracy1}")
             #print(f"Lenght val loader: {len(val_loader)}, counter: {temp}")
             val_accuracy /= len(val_loader) 
             if log: 
