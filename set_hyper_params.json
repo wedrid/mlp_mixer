@@ -1,11 +1,11 @@
 {
-    "dataset": "imagenet",
+    "dataset": "CIFAR100",
     "rand_augm_numops": 2,
     "rand_augm_magnitude": 10,
     "comment": "randaugm",
     "learning_rate": 0.001,
     "epochs": 500,
-    "batch_size": 4096,
+    "batch_size": 512,
     "mixup_alpha": -1,
     "weight_decay": 0.1,
     "patch_width_and_height": 8,
