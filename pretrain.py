@@ -150,6 +150,6 @@ if __name__ == "__main__":
     with open('set_hyper_params.json') as json_file:
         in_hyperparams = json.load(json_file)
     
-    train_loader, val_loader, num_classes = getCIFAR100Loaders(in_hyperparams)
+    train_loader, val_loader, num_classes = getImagenetLoaders(in_hyperparams)
     in_hyperparams['num_classes'] = num_classes
     train(in_hyperparams, train_loader, val_loader)
