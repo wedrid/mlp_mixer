@@ -13,60 +13,7 @@ import matplotlib.pyplot as plt
 #controllare che len(val) è len(train)
 log = True
 
-def getCIFAR100Loaders(in_params, root='./cifar100_data'):
-    randAugm_numops = in_params['rand_augm_numops']
-    randAugm_magn = in_params['rand_augm_magnitude']
-    pad_totensor_transform = transforms.Compose([
-        transforms.RandAugment(num_ops = randAugm_numops,magnitude = randAugm_magn),
-        transforms.ToTensor()]) #no pad, no normalization
 
-    dataset = torchvision.datasets.CIFAR100(root=root, train=True, transform=pad_totensor_transform, download=True)
-    test_dataset = torchvision.datasets.CIFAR100(root=root, train=False, transform=transforms.ToTensor())
-
-
-    train_loader = torch.utils.data.DataLoader(dataset=dataset, shuffle=True, batch_size=in_params['batch_size'])
-    val_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=in_params['batch_size'], shuffle=False)
-
-    print(f"BATCH SIZE: {in_params['batch_size']}")
-    print(f"Tran subset len: {len(dataset)}")
-    print(f"Tran loader len: {len(train_loader)}")
-    print(f"Test: {len(dataset)/in_params['batch_size']}")
-
-    print(f"Val/test subset len: {len(test_dataset)}")
-    print(f"Val/test subset len: {len(val_loader)}")
-    print(f"Val/Test: {len(test_dataset)/in_params['batch_size']}")
-
-    print(f"Test subset len: {len(test_dataset)}")
-    print(f"Test subset len: {len(val_loader)}")
-    print(f"Test: {len(test_dataset)/in_params['batch_size']}")
-    return train_loader, val_loader
-
-def getImagenetLoaders(in_params, root='../datasets/imagenet'):
-    randAugm_numops = in_params['rand_augm_numops']
-    randAugm_magn = in_params['rand_augm_magnitude']
-    my_transform = transforms.Compose([
-        transforms.RandAugment(num_ops = randAugm_numops, magnitude = randAugm_magn),
-        transforms.ToTensor()]) #no pad, no normalization
-
-    train_dataset = torchvision.datasets.ImageFolder(root=root + "/train", transform=my_transform)
-    test_dataset = torchvision.datasets.ImageFolder(root=root + "/validation", transform=transforms.ToTensor())
-
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, shuffle=True, batch_size=in_params['batch_size'])
-    val_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=in_params['batch_size'], shuffle=False)
-
-    print(f"BATCH SIZE: {in_params['batch_size']}")
-    print(f"Tran subset len: {len(train_dataset)}")
-    print(f"Tran loader len: {len(train_loader)}")
-    print(f"Test: {len(train_dataset)/in_params['batch_size']}")
-
-    print(f"Val/test subset len: {len(test_dataset)}")
-    print(f"Val/test subset len: {len(val_loader)}")
-    print(f"Val/Test: {len(test_dataset)/in_params['batch_size']}")
-
-    print(f"Test subset len: {len(test_dataset)}")
-    print(f"Test subset len: {len(val_loader)}")
-    print(f"Test: {len(test_dataset)/in_params['batch_size']}")
-    return train_loader, val_loader
 
 def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
     #hyperparameters
