@@ -128,7 +128,7 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
             # forward pass
             predicted = model(images)
             loss = loss_func(predicted, labels)
-            train_accuracy += get_accuracy(predicted, labels)
+            train_accuracy += ((predicted.argmax(dim=-1) == labels).float().mean()).item()
 
             # backwards pass
             optimizer.zero_grad()
@@ -159,7 +159,7 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
                 # forward pass
                 predicted = model(images)
                 loss = loss_func(predicted, labels)
-                val_accuracy += get_accuracy(predicted, labels)
+                val_accuracy += ((predicted.argmax(dim=-1) == labels).float().mean()).item()
             #print(f"Lenght val loader: {len(val_loader)}, counter: {temp}")
             val_accuracy /= len(val_loader) 
             experiment.log_metric("val epoch loss", loss.item(), step=epoch)
