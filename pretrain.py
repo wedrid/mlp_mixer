@@ -87,12 +87,6 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
     model_path = generate_folder()
     with open(model_path+"/out_hyperparams.json", "w") as file:
         json.dump(out_hyperparams, file, indent=4)
-    
-    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
-    params = sum([np.prod(p.size()) for p in model_parameters])
-    num_params = str(params)
-    print(num_params)
-    experiment.log_other('num learnable params', num_params)
 
     model.to(device)
     # training loop
