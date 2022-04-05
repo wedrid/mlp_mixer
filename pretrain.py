@@ -59,7 +59,7 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
         hidden_dim_mlp_token=mlp_ds_dimension, hidden_dim_mlp_channel=mlp_dc_dimension) #in this case 2 patches 16x16
     
     optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay=in_hyperparams['weight_decay']) #weight decay 0.1?
-    print(f"WEIGHT DECAY: {in_hyperparams['weight_decay']}")
+    print(f"WEIGHT DECAY: {in_hyperparams['weight_decay']}") 
     steps_total = len(train_loader)
 
     #ATTENZIONE: CAMBIARE IPERPARAMETRI ***PRIMAAAA*** DEL DICT SUCCESSIVO
