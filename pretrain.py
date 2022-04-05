@@ -56,7 +56,7 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
 
     model = MLP_mixer(img_h_w=image_width_height, patch_dim=patch_dims, n_channels=n_channels, n_classes=in_hyperparams['num_classes'], num_mixers_layers=num_layers,
         hidden_dim_mlp_token=mlp_ds_dimension, hidden_dim_mlp_channel=mlp_dc_dimension) #in this case 2 patches 16x16
-    optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay=1e-5) #weight decay 0.1?
+    optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay=in_hyperparams['weight_decay']) #weight decay 0.1?
 
     steps_total = len(train_loader)
 
@@ -87,6 +87,12 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
     model_path = generate_folder()
     with open(model_path+"/out_hyperparams.json", "w") as file:
         json.dump(out_hyperparams, file, indent=4)
+    
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    num_params = str(params)
+    print(num_params)
+    experiment.log_other({'num learnable params': num_params})
 
     model.to(device)
     # training loop
