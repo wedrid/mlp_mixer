@@ -1,7 +1,10 @@
+from comet_ml import Experiment
 import json
 from mlp_mixer import * 
 import torch
 from get_dataloaders import *
+from tqdm import tqdm
+import time
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -12,7 +15,10 @@ with open(path+'out_hyperparams.json') as json_file:
 model = MLP_mixer(img_h_w=params['image_width_and_height'], patch_dim=params['patch_width_and_height'], n_channels=params['hidden_dim_size (n_channels)'], num_mixers_layers=params['number_of_layers'],
     hidden_dim_mlp_token=params['mlp_ds_dimension'], hidden_dim_mlp_channel=params['mlp_dc_dimension'], n_classes=1000)
 
-model.load_state_dict(torch.load(path+"checkpoint_epch_300.pth", map_location='cpu'))
+if device == 'cpu':
+    model.load_state_dict(torch.load(path+"checkpoint_epch_300.pth", map_location='cpu'))
+else:
+    model.load_state_dict(torch.load(path+"checkpoint_epch_300.pth"))
 model.eval()
 
 params['batch_size'] = 512
@@ -26,9 +32,7 @@ model.to(device)
 #define hyperparameters for the fine tuning
 new_params = {'learning_rate': 0.001, 'weight_decay': 1e-5}
 
-from tqdm.notebook import tqdm
-import time
-from comet_ml import Experiment
+
 
 experiment = Experiment(
     api_key="xX6qWBFbiOreu0W3IrO14b9nB",
