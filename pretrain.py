@@ -46,7 +46,8 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
     if log: 
         experiment = Experiment(
             api_key="xX6qWBFbiOreu0W3IrO14b9nB",
-            project_name="mlp-mixer-pretraining",
+            #project_name="mlp-mixer-pretraining",
+            project_name="mlp-mixer",
             workspace="wedrid",
         )
 
@@ -56,8 +57,9 @@ def train(in_hyperparams, train_loader, val_loader, model=None):
 
     model = MLP_mixer(img_h_w=image_width_height, patch_dim=patch_dims, n_channels=n_channels, n_classes=in_hyperparams['num_classes'], num_mixers_layers=num_layers,
         hidden_dim_mlp_token=mlp_ds_dimension, hidden_dim_mlp_channel=mlp_dc_dimension) #in this case 2 patches 16x16
+    
     optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay=in_hyperparams['weight_decay']) #weight decay 0.1?
-
+    print(f"WEIGHT DECAY: {in_hyperparams['weight_decay']}")
     steps_total = len(train_loader)
 
     #ATTENZIONE: CAMBIARE IPERPARAMETRI ***PRIMAAAA*** DEL DICT SUCCESSIVO
@@ -150,6 +152,7 @@ if __name__ == "__main__":
     with open('set_hyper_params.json') as json_file:
         in_hyperparams = json.load(json_file)
     
-    train_loader, val_loader, num_classes = getImagenetLoaders(in_hyperparams)
+    #train_loader, val_loader, num_classes = getImagenetLoaders(in_hyperparams)
+    train_loader, val_loader, num_classes = getCIFAR100Loaders(in_hyperparams)
     in_hyperparams['num_classes'] = num_classes
     train(in_hyperparams, train_loader, val_loader)
