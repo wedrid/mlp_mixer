@@ -99,4 +99,4 @@ for epoch in tqdm(range(num_epochs)):
             experiment.log_metric("mean val epoch accuracy", val_accuracy, step=epoch)
     
     if epoch % 12 == 0:
-        torch.save(model.state_dict(), model_path + f"checkpoint_epch_{epoch}.pth")
+        torch.save(model.state_dict(), model_path + f"finetune_checkpoint_epch_{epoch}.pth")
