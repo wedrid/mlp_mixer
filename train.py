@@ -132,7 +132,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
         #print(f"TRAIN LOADER LENGTH: {len(train_loader)}")
         end = time.time()
         elapsed = end - start
-        
+         
         if log: 
             experiment.log_metric("train epoch loss", loss.item(), step=epoch)
             experiment.log_metric("mean train epoch accuracy", train_accuracy, step=epoch)
