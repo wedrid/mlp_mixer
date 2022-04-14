@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 #controllare che len(val) è len(train)
 log = True
-
+scheduling = True
 
 
 def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
@@ -69,6 +69,10 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
     steps_total = len(train_loader)
 
     #ATTENZIONE: CAMBIARE IPERPARAMETRI ***PRIMAAAA*** DEL DICT SUCCESSIVO
+    if scheduling: 
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer=optimizer, max_lr=in_hyperparams['learning_rate'], pct_start=0.05,  # 0.05
+                                                        total_steps=len(train_loader) * num_epochs,
+                                                        anneal_strategy='cos')
 
     out_hyperparams = {
         "dataset": in_hyperparams['dataset'],
@@ -139,6 +143,8 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
             experiment.log_metric("epoch time", elapsed, step = epoch)
 
         # validation
+        if scheduling:
+            scheduler.step()
         with torch.no_grad():
             model.eval()
             val_accuracy = 0
