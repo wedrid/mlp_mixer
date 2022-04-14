@@ -9,7 +9,7 @@ import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-scheduling = True
+scheduling = False
 
 path = "./models/20220401-122435/"
 with open(path+'out_hyperparams.json') as json_file:
