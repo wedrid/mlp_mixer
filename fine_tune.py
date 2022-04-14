@@ -5,8 +5,11 @@ import torch
 from get_dataloaders import *
 from tqdm import tqdm
 import time
+import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+scheduling = True
 
 path = "./models/20220401-122435/"
 with open(path+'out_hyperparams.json') as json_file:
@@ -30,8 +33,7 @@ model.fc_head = nn.Linear(num_in_features, num_classes)
 model.to(device)
 
 #define hyperparameters for the fine tuning
-new_params = {'learning_rate': 0.001, 'weight_decay': 1e-5}
-
+new_params = {'learning_rate': 0.001, 'weight_decay': 1e-4, 'gradient_clipping': 1, 'comment': 'on cifar100 e sched', 'lr_sched': scheduling}
 
 
 experiment = Experiment(
@@ -40,11 +42,24 @@ experiment = Experiment(
     workspace="wedrid",
 )
 
+
 log = True
 num_epochs = 500
 optimizer = torch.optim.Adam(model.parameters(), lr = new_params['learning_rate'], weight_decay=new_params['weight_decay'])
-
+datetime = time.strftime("%Y%m%d-%H%M%S")
 loss_func = nn.CrossEntropyLoss()
+
+experiment.log_parameters(new_params)
+
+model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+params = sum([np.prod(p.size()) for p in model_parameters])
+print(f"Num parameters {params}")
+
+if scheduling: 
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer=optimizer, max_lr=new_params['learning_rate'], pct_start=0.05,  # 0.05
+                                                        total_steps=len(train_loader) * num_epochs,
+                                                        anneal_strategy='cos')
+
 model.to(device)
 # training loop
 for epoch in tqdm(range(num_epochs)):
@@ -64,6 +79,8 @@ for epoch in tqdm(range(num_epochs)):
         # backwards pass
         optimizer.zero_grad()
         loss.backward()
+
+        nn.utils.clip_grad_value_(model.parameters(), new_params['gradient_clipping'])
         optimizer.step()
         
         if False and (i+1) % 100:
@@ -77,6 +94,9 @@ for epoch in tqdm(range(num_epochs)):
         experiment.log_metric("train epoch loss", loss.item(), step=epoch)
         experiment.log_metric("mean train epoch accuracy", train_accuracy, step=epoch)
         experiment.log_metric("epoch time", elapsed, step = epoch)
+
+    if scheduling:
+        scheduler.step()
 
     # validation
     with torch.no_grad():
@@ -98,5 +118,8 @@ for epoch in tqdm(range(num_epochs)):
             experiment.log_metric("val epoch loss", loss.item(), step=epoch)
             experiment.log_metric("mean val epoch accuracy", val_accuracy, step=epoch)
     
-    if epoch % 12 == 0:
-        torch.save(model.state_dict(), path + f"finetune_checkpoint_epch_{epoch}.pth")
+    if epoch % 2 == 0:
+        torch.save(model.state_dict(), path + f"finetune_checkpoint_epch_{epoch}_{datetime}.pth")
+
+with open(path+f"hyper_{datetime}.json", "w") as file:
+        json.dump(new_params, file, indent=4)
