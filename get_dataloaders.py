@@ -30,6 +30,34 @@ def getCIFAR100Loaders(in_params, root='./cifar100_data'):
     print(f"Test subset len: {len(val_loader)}")
     print(f"Test: {len(test_dataset)/in_params['batch_size']}")
     return train_loader, val_loader, len(dataset.classes)
+
+def getCIFAR10Loaders(in_params, root='./cifar100_data'):
+    randAugm_numops = in_params['rand_augm_numops']
+    randAugm_magn = in_params['rand_augm_magnitude']
+    pad_totensor_transform = transforms.Compose([
+        transforms.RandAugment(num_ops = randAugm_numops,magnitude = randAugm_magn),
+        transforms.ToTensor()]) #no pad, no normalization
+
+    dataset = torchvision.datasets.CIFAR10(root=root, train=True, transform=pad_totensor_transform, download=True)
+    test_dataset = torchvision.datasets.CIFAR10(root=root, train=False, transform=transforms.ToTensor())
+
+
+    train_loader = torch.utils.data.DataLoader(dataset=dataset, shuffle=True, batch_size=in_params['batch_size'])
+    val_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=in_params['batch_size'], shuffle=False)
+
+    print(f"BATCH SIZE: {in_params['batch_size']}")
+    print(f"Tran subset len: {len(dataset)}")
+    print(f"Tran loader len: {len(train_loader)}")
+    print(f"Test: {len(dataset)/in_params['batch_size']}")
+
+    print(f"Val/test subset len: {len(test_dataset)}")
+    print(f"Val/test subset len: {len(val_loader)}")
+    print(f"Val/Test: {len(test_dataset)/in_params['batch_size']}")
+
+    print(f"Test subset len: {len(test_dataset)}")
+    print(f"Test subset len: {len(val_loader)}")
+    print(f"Test: {len(test_dataset)/in_params['batch_size']}")
+    return train_loader, val_loader, len(dataset.classes)
     
 
 def getImagenetLoaders(in_params, root='../datasets/imagenet'):
