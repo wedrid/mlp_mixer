@@ -1,0 +1,21 @@
+{
+    "dataset": "CIFAR10",
+    "num_classes": 10,
+    "rand_augm_numops": 2,
+    "rand_augm_magnitude": 10,
+    "comment": "added weight decay",
+    "train_size": 98,
+    "validation_size": 20,
+    "learning_rate": 0.001,
+    "epochs": 500,
+    "steps": 98,
+    "batch_size": 512,
+    "mixup_alpha": -1,
+    "weight_decay": 0.001,
+    "image_width_and_height": 32,
+    "patch_width_and_height": 8,
+    "hidden_dim_size (n_channels)": 128,
+    "number_of_layers": 8,
+    "mlp_dc_dimension": 512,
+    "mlp_ds_dimension": 64
+}
