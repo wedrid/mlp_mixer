@@ -1,11 +1,13 @@
 from mlp_mixer import * 
 import json
+import numpy as np
 
 ####### EVAL PARAMS
 one_batch = False
-mod = 'mlp' #vit resnet
-batchsize = 512
-warmup = False
+mod = 'resnet' #mlp vit resnet
+batchsize = 500
+warmup = True
+num_trials = 100
 
 
 if mod == 'mlp':
@@ -154,6 +156,10 @@ elif mod == 'resnet':
 
     model = resnet110(num_cls=10)
 
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    print(f"Num parameters {params}")
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     #if device == 'cpu':
@@ -172,30 +178,31 @@ from get_dataloaders import *
 root = './cifar100_data' #if not in lab
 
 dataloader_params = {'rand_augm_magnitude': 0, 'rand_augm_numops': 0, 'batch_size':batchsize}
-one_batch = False
 if one_batch: 
     dataloader_params['batch_size'] = 10000
 else:
     dataloader_params['batch_size'] = dataloader_params['batch_size']
 
 
-_, test_loader, _ = getCIFAR100Loaders(dataloader_params)
+_, test_loader, _ = getCIFAR10Loaders(dataloader_params)
 
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import time
 import numpy as np
 
 loss_func = loss_func = nn.CrossEntropyLoss()
 
 #processor warmup
-
+model = model.to(device)
 if warmup:
     print("Processor warmup..")
-    for _ in enumerate(tqdm(test_loader)): #numero esempi/batchsize TODO check
+    for i, (images, labels) in enumerate(tqdm(test_loader)): #numero esempi/batchsize TODO check
+        #print(i)
         images = images.to(device)
         labels = labels.to(device)
-        for _ in range(5):
+        for _ in range(50):
             predicted = model(images)
+        #print(len(images))
     print("..warmed up!")
 
 if device == 'cuda':
@@ -209,23 +216,34 @@ with torch.no_grad():
         val_accuracy = 0
         val_top_5_acc = 0
         temp = 0
-        for i, (images, labels) in enumerate(tqdm(test_loader)): #numero esempi/batchsize TODO check
-            images = images.to(device)
-            labels = labels.to(device)
-            
-            # forward pass
-            start = time.time()
-            predicted = model(images)
-            end = time.time()
-            elapsed = end - start
-
-            times.append(elapsed)
-            #val_accuracy += get_accuracy(predicted, labels)
-            #val_top_5_acc += get_top_5_accuracy(predicted, labels)
-        #print(f"Lenght val loader: {len(val_loader)}, counter: {temp}")
-
-        if one_batch:
-            print(f"Elapsed: {elapsed}")
+        total_preds = 0
+        inizio = time.time()
+        for _ in tqdm(range(num_trials)):
+            for i, (images, labels) in enumerate((test_loader)): #numero esempi/batchsize TODO check
+                images = images.to(device)
+                labels = labels.to(device)
+                
+                # forward pass
+                start = time.time()
+                predicted = model(images)
+                end = time.time()
+                total_preds += batchsize
+                elapsed = end - start
+                #print(elapsed)
+                times.append(elapsed) #time for one batch
+        fine = time.time()
+        print(f"Total time {fine-inizio}")
         times = np.array(times)
         mean_time = times.mean()
-        print(f"Average time = {times.mean()}")
+        print(f"Average time per batch = {times.mean()}")
+        avg_time_per_image = times.mean()/batchsize
+        print(f"Average time (s) per image = {avg_time_per_image}")
+        print(f"And we do {pow(avg_time_per_image, -1)} images per second")
+        
+
+        print(f"total preds = {total_preds}")
+        #print(f"Average time of one batch is: {sum(times)/(10000*num_trials)} => because batch size is {1000} for one image it takes {(sum(times)/(batchsize*num_trials))/batchsize}")
+        print(f"Then, we do {total_preds/sum(times)} images per second")
+        import statistics
+        std = statistics.stdev(times)
+        print(f"Average time for batch of {batchsize} is {mean_time} with std {std}")
