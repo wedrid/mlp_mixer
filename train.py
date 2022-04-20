@@ -9,10 +9,11 @@ from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 import json
 import matplotlib.pyplot as plt
+from get_dataloaders import * 
 
 #controllare che len(val) è len(train)
 log = True
-scheduling = True
+scheduling = False
 
 
 def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
@@ -44,7 +45,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
     if log: 
         experiment = Experiment(
         api_key="xX6qWBFbiOreu0W3IrO14b9nB",
-        project_name="mlp-mixer-pretraining",
+        project_name="mlp-mixer-final-trials",
         workspace="wedrid",
         )
         #experiment = Experiment(
@@ -75,11 +76,12 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
                                                         anneal_strategy='cos')
 
     out_hyperparams = {
+        "scheduling": scheduling,
         "dataset": in_hyperparams['dataset'],
         "num_classes": in_hyperparams['num_classes'],
         "rand_augm_numops": in_hyperparams['rand_augm_numops'],
         "rand_augm_magnitude": in_hyperparams['rand_augm_magnitude'],
-        "comment": 'added weight decay',
+        "comment": 'trial con parametri come fine tune',
         "train_size": len(train_loader),
         "validation_size": len(val_loader),
         "learning_rate": learning_rate,
@@ -178,19 +180,13 @@ if __name__ == "__main__":
                     help="pretrained model path, if empty does normal training" )
 
     args = parser.parse_args()
-    #if we want to do fine tuning
-    if args.pretrained_model_path != "":
-        pass
-    
-    else:
-        with open('set_hyper_params.json') as json_file:
-            in_hyperparams = json.load(json_file)
-        if in_hyperparams['dataset'] == "CIFAR100":
-            train_loader, val_loader = getCIFAR100Loaders(in_hyperparams)
-            in_hyperparams['num_classes'] = 100
-        elif in_hyperparams['dataset'] == "imagenet":
-            in_hyperparams['num_classes'] = 1000
-            train_loader, val_loader = getImagenetLoaders(in_hyperparams)
 
-        train(in_hyperparams, train_loader, val_loader)
-    
+    with open('set_hyper_params.json') as json_file:
+        in_hyperparams = json.load(json_file)
+    if in_hyperparams['dataset'] == "CIFAR100":
+        train_loader, val_loader, in_hyperparams['num_classes'] = getCIFAR100Loaders(in_hyperparams)
+    elif in_hyperparams['dataset'] == "CIFAR10":
+        train_loader, val_loader, in_hyperparams['num_classes'] = getCIFAR10Loaders(in_hyperparams)
+        
+
+    train(in_hyperparams, train_loader, val_loader)
