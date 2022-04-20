@@ -152,12 +152,18 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
             val_accuracy = 0
             for i, (images, labels) in enumerate(tqdm(val_loader)): #numero esempi/batchsize TODO check
                 # [100, 3, 36, 36] is what is returned by iterator
-                images = images.to(device)
-                labels = labels.to(device)
-                
+                if mixup_alpha > 0:
+                    images, labels_a, labels_b, lam = mixup_data(images, labels, alpha=mixup_alpha, device=device)
+                    #images, labels_a, labels_b = map(Variable, ) no because Variable is deprecated
+                    predicted = model(images)
+                    loss = mixup_criterion(loss_func, predicted, labels_a, labels_b, lam)
+                else:
+                    images = images.to(device)
+                    labels = labels.to(device)
                 # forward pass
                 predicted = model(images)
                 loss = loss_func(predicted, labels)
+
                 #val_accuracy1 += get_accuracy(predicted, labels)
                 val_accuracy += ((predicted.argmax(dim=-1) == labels).float().mean()).item()
                 #print(f"\n val accuracy {val_accuracy}, previous: {val_accuracy1}")
