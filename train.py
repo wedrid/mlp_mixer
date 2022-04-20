@@ -9,6 +9,7 @@ from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 import json
 import matplotlib.pyplot as plt
+from get_dataloaders import *
 
 #controllare che len(val) è len(train)
 log = True
@@ -17,6 +18,7 @@ scheduling = True
 
 def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
     #hyperparameters
+    print(in_hyperparams)
     patch_dims = in_hyperparams['patch_width_and_height']
     # variable_name = value #paper value
     n_channels = in_hyperparams['hidden_dim_size (n_channels)'] #128 #256 #100 #512 #embed dim
@@ -79,7 +81,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
         "num_classes": in_hyperparams['num_classes'],
         "rand_augm_numops": in_hyperparams['rand_augm_numops'],
         "rand_augm_magnitude": in_hyperparams['rand_augm_magnitude'],
-        "comment": 'added weight decay',
+        "comment": 'trial with mixup',
         "train_size": len(train_loader),
         "validation_size": len(val_loader),
         "learning_rate": learning_rate,
@@ -112,16 +114,22 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
         for i, (images, labels) in enumerate(tqdm(train_loader)):
             #print("HELLO")
             # [100, 3, 36, 36] is what is returned by iterator
-            images = images.to(device)
-            labels = labels.to(device)
-            # forward pass
+
+            images, labels_a, labels_b, lam = mixup_data(images, labels, alpha=mixup_alpha, device=device)
+            #images, labels_a, labels_b = map(Variable, ) no because Variable is deprecated
             predicted = model(images)
-            loss = loss_func(predicted, labels)
+            loss = mixup_criterion(loss_func, predicted, labels_a, labels_b, lam)
+
+            ##### before mixup
+            #images = images.to(device)
+            #labels = labels.to(device)
+            # forward pass
+            #predicted = model(images)
+            #loss = loss_func(predicted, labels)
+
+            #### before mixup
+
             train_accuracy += ((predicted.argmax(dim=-1) == labels).float().mean()).item()
-            #train_accuracy1 += get_accuracy(predicted, labels)
-            #print(f"\nACCURACY {(train_accuracy)}")
-            #print(f"prev acuracy {train_accuracy1}")
-            #train_accuracy += get_accuracy(predicted, labels)
 
             # backwards pass
             optimizer.zero_grad()
@@ -178,19 +186,12 @@ if __name__ == "__main__":
                     help="pretrained model path, if empty does normal training" )
 
     args = parser.parse_args()
-    #if we want to do fine tuning
-    if args.pretrained_model_path != "":
-        pass
-    
-    else:
-        with open('set_hyper_params.json') as json_file:
-            in_hyperparams = json.load(json_file)
-        if in_hyperparams['dataset'] == "CIFAR100":
-            train_loader, val_loader = getCIFAR100Loaders(in_hyperparams)
-            in_hyperparams['num_classes'] = 100
-        elif in_hyperparams['dataset'] == "imagenet":
-            in_hyperparams['num_classes'] = 1000
-            train_loader, val_loader = getImagenetLoaders(in_hyperparams)
 
-        train(in_hyperparams, train_loader, val_loader)
+
+    with open('set_hyper_params.json') as json_file:
+        in_hyperparams = json.load(json_file)
+    train_loader, val_loader, in_hyperparams['num_classes'] = getCIFAR100Loaders(in_hyperparams)
+    print(in_hyperparams['num_classes'])
     
+    train(in_hyperparams, train_loader, val_loader)
+
