@@ -38,7 +38,7 @@ def mixup_data(x, y, alpha=1.0, device = 'cpu'):
 
     mixed_x = lam * x + (1 - lam) * x[index, :]
     y_a, y_b = y, y[index]
-    return mixed_x, y_a, y_b, lam
+    return mixed_x.to(device), y_a.to(device), y_b.to(device), lam
 
 
 def mixup_criterion(criterion, pred, y_a, y_b, lam):

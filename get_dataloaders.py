@@ -3,7 +3,7 @@ import torchvision
 import torchvision.transforms as transforms
 
 
-def getCIFAR100Loaders(in_params, root='./cifar100_data'):
+def getCIFAR100Loaders(in_params, root='./cifarCento_data'):
     randAugm_numops = in_params['rand_augm_numops']
     randAugm_magn = in_params['rand_augm_magnitude']
     pad_totensor_transform = transforms.Compose([
@@ -31,7 +31,7 @@ def getCIFAR100Loaders(in_params, root='./cifar100_data'):
     print(f"Test: {len(test_dataset)/in_params['batch_size']}")
     return train_loader, val_loader, len(dataset.classes)
 
-def getCIFAR10Loaders(in_params, root='./cifar100_data'):
+def getCIFAR10Loaders(in_params, root='./cifar10_data'):
     randAugm_numops = in_params['rand_augm_numops']
     randAugm_magn = in_params['rand_augm_magnitude']
     pad_totensor_transform = transforms.Compose([
@@ -40,7 +40,7 @@ def getCIFAR10Loaders(in_params, root='./cifar100_data'):
 
     dataset = torchvision.datasets.CIFAR10(root=root, train=True, transform=pad_totensor_transform, download=True)
     test_dataset = torchvision.datasets.CIFAR10(root=root, train=False, transform=transforms.ToTensor())
-
+    print(f"LEN TEST DATASET: {len(test_dataset)}")
 
     train_loader = torch.utils.data.DataLoader(dataset=dataset, shuffle=True, batch_size=in_params['batch_size'])
     val_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=in_params['batch_size'], shuffle=False)

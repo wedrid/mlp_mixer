@@ -33,15 +33,13 @@ model.fc_head = nn.Linear(num_in_features, num_classes)
 model.to(device)
 
 #define hyperparameters for the fine tuning
-new_params = {'learning_rate': 0.001, 'weight_decay': 1e-4, 'gradient_clipping': 1, 'comment': 'on cifar100 e sched', 'lr_sched': scheduling}
-
+new_params = {'learning_rate': 0.0001, 'weight_decay': 1e-3, 'gradient_clipping': 1, 'comment': 'on cifar100', 'lr_sched': scheduling}
 
 experiment = Experiment(
     api_key="xX6qWBFbiOreu0W3IrO14b9nB",
     project_name="mlp-mixer-finetune",
     workspace="wedrid",
 )
-
 
 log = True
 num_epochs = 500
@@ -118,7 +116,7 @@ for epoch in tqdm(range(num_epochs)):
             experiment.log_metric("val epoch loss", loss.item(), step=epoch)
             experiment.log_metric("mean val epoch accuracy", val_accuracy, step=epoch)
     
-    if epoch % 2 == 0:
+    if epoch % 5 == 0:
         torch.save(model.state_dict(), path + f"finetune_checkpoint_epch_{epoch}_{datetime}.pth")
 
 with open(path+f"hyper_{datetime}.json", "w") as file:
