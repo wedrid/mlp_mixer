@@ -4,7 +4,11 @@
     "rand_augm_magnitude": 10,
     "comment": "randaugm",
     "learning_rate": 0.001,
+<<<<<<< HEAD
     "epochs": 1000,
+=======
+    "epochs": 500,
+>>>>>>> eaa98f22f770a473a7dbbe71538da8b04e5a7856
     "batch_size": 512,
     "mixup_alpha": 0.5,
     "weight_decay": 0.0001,

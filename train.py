@@ -18,6 +18,7 @@ scheduling = False
 
 def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
     #hyperparameters
+    print(in_hyperparams)
     patch_dims = in_hyperparams['patch_width_and_height']
     # variable_name = value #paper value
     n_channels = in_hyperparams['hidden_dim_size (n_channels)'] #128 #256 #100 #512 #embed dim
@@ -81,7 +82,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
         "num_classes": in_hyperparams['num_classes'],
         "rand_augm_numops": in_hyperparams['rand_augm_numops'],
         "rand_augm_magnitude": in_hyperparams['rand_augm_magnitude'],
-        "comment": 'trial con parametri come fine tune',
+        "comment": 'trial with mixup',
         "train_size": len(train_loader),
         "validation_size": len(val_loader),
         "learning_rate": learning_rate,
