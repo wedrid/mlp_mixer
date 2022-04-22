@@ -11,5 +11,7 @@ Her ViT implementation can be found here: https://github.com/chiaraalbi46/ViT
 
 Our results are synthetized in this presentation: https://docs.google.com/presentation/d/1gkpbro_fxi9ntAtzNo821gi6YvPTknwzx-MfhhPbvbE/edit?usp=sharing 
 
+If the training code doesn't work, its most likely due to my removal of the logging object that logged parameters on comet.ml. The file containing the implementation should likely work. 
+
 [1] Ilya Tolstikhin et al., 2021, MLP-Mixer: An all-MLP Architecture for Vision.
 [2] Alexey Dosovitskiy et al., 2020, An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale
