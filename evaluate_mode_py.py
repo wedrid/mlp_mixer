@@ -27,7 +27,10 @@ if mod == 'mlp':
 
     model = MLP_mixer(img_h_w=image_width_height, patch_dim=patch_dims, n_channels=n_channels, num_mixers_layers=num_layers,
         hidden_dim_mlp_token=mlp_ds_dimension, hidden_dim_mlp_channel=mlp_dc_dimension, n_classes=10)
-
+    
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    print(f"Num parameters {params}")
     #model.load_state_dict(torch.load(path+"final.pth"))
     #model.load_state_dict(torch.load(path+"edo_model_weights.pth"))
     model.eval()
@@ -36,6 +39,7 @@ elif mod == 'vit':
     import json
     from vit import *
     print("LOADING VIT")
+    
 
     # rand aug and scheduling learning rate applied
 
@@ -52,7 +56,9 @@ elif mod == 'vit':
                 num_heads=hyper_params['num_heads'], num_layers=hyper_params['num_layers'],
                 num_classes=10, patch_size=hyper_params['patch_size'],
                 hidden_dim=hyper_params['hidden_dim'], dropout_value=hyper_params['dropout_value'])
-
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    print(f"Num parameters {params}")
     # print(model)
 
     model.eval()
@@ -155,6 +161,7 @@ elif mod == 'resnet':
         return ResNet(BasicBlock, [18, 18, 18], num_classes=num_cls)
 
     model = resnet110(num_cls=10)
+    
 
     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
     params = sum([np.prod(p.size()) for p in model_parameters])

@@ -33,7 +33,7 @@ model.fc_head = nn.Linear(num_in_features, num_classes)
 model.to(device)
 
 #define hyperparameters for the fine tuning
-new_params = {'learning_rate': 0.001, 'weight_decay': 1e-4, 'gradient_clipping': 1, 'comment': 'on cifar100 e sched', 'lr_sched': scheduling}
+new_params = {'learning_rate': 0.001, 'weight_decay': 1e-4, 'gradient_clipping': 1, 'comment': 'on cifar100', 'lr_sched': scheduling}
 
 
 experiment = Experiment(
