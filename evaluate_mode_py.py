@@ -4,7 +4,7 @@ import numpy as np
 
 ####### EVAL PARAMS
 one_batch = False
-mod = 'resnet' #mlp vit resnet
+mod = 'mlp' #mlp vit resnet
 batchsize = 500
 warmup = True
 num_trials = 100
@@ -61,8 +61,12 @@ elif mod == 'vit':
     print(f"Num parameters {params}")
     # print(model)
 
-    model.eval()
+    
 
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    print(f"Num parameters {params}")
+    model.eval()
     model.to(device)
 elif mod == 'resnet':
     import torch
@@ -157,11 +161,12 @@ elif mod == 'resnet':
 
 
 
-    def resnet110(num_cls):
-        return ResNet(BasicBlock, [18, 18, 18], num_classes=num_cls)
+   # def resnet110(num_cls):
+    #    return ResNet(BasicBlock, [18, 18, 18], num_classes=num_cls)
+    def resnet56(num_cls):
+        return ResNet(BasicBlock, [9, 9, 9], num_classes=num_cls)
 
-    model = resnet110(num_cls=10)
-    
+    model = resnet56(num_cls=10)
 
     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
     params = sum([np.prod(p.size()) for p in model_parameters])
