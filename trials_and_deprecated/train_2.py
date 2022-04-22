@@ -43,15 +43,7 @@ def train(in_hyperparams, train_loader, val_loader, pretrained_model_path=None):
     #plt.show()
 
     if log: 
-        experiment = Experiment(
-        api_key="xX6qWBFbiOreu0W3IrO14b9nB",
-        project_name="mlp-mixer-pretraining",
-        workspace="wedrid",
-        )
-        #experiment = Experiment(
-        #api_key="xX6qWBFbiOreu0W3IrO14b9nB",
-        #project_name="mlp-mixer",
-        #workspace="wedrid",)
+        experiment = None
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     image_width_height = img_sample.shape[1]
 

@@ -35,11 +35,7 @@ model.to(device)
 #define hyperparameters for the fine tuning
 new_params = {'learning_rate': 0.0001, 'weight_decay': 1e-3, 'gradient_clipping': 1, 'comment': 'on cifar100', 'lr_sched': scheduling}
 
-experiment = Experiment(
-    api_key="xX6qWBFbiOreu0W3IrO14b9nB",
-    project_name="mlp-mixer-finetune",
-    workspace="wedrid",
-)
+experiment = None
 
 log = True
 num_epochs = 500
